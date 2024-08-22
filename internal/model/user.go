@@ -2,7 +2,16 @@ package model
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 	"golang.org/x/crypto/bcrypt"
+)
+
+type Role string
+
+const (
+	SuperAdmin   Role = "super_admin"
+	ContentAdmin Role = "content_admin"
+	BaseUser     Role = "user"
 )
 
 type User struct {
@@ -10,6 +19,8 @@ type User struct {
 	Username          string `json:"username"`
 	Password          string `json:"password,omitempty"`
 	EncryptedPassword string `json:"-"`
+	Email             string `json:"email"`
+	Role              Role   `json:"role"`
 }
 
 func (u *User) Validate() error {
@@ -20,9 +31,19 @@ func (u *User) Validate() error {
 			validation.Required,
 		),
 		validation.Field(
+			&u.Email,
+			validation.Required,
+			is.Email,
+		),
+		validation.Field(
 			&u.Password,
 			validation.By(requiredIf(u.EncryptedPassword == "")),
 			validation.Length(6, 100),
+		),
+		validation.Field(
+			&u.Role,
+			validation.Required,
+			validation.In(SuperAdmin, ContentAdmin, BaseUser),
 		),
 	)
 }
