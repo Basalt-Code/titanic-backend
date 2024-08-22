@@ -18,30 +18,61 @@ func (r *UserRepository) Create(u *model.User) error {
 		return err
 	}
 
+	user, _ := r.FindByEmail(u.Email)
+	if user != nil {
+		return store.ErrUserAlreadyExists
+	}
+	user, _ = r.FindByUsername(u.Username)
+	if user != nil {
+		return store.ErrUserAlreadyExists
+	}
+
 	return r.store.db.QueryRow(
-		"INSERT INTO users (username, encrypted_password) VALUES ($1, $2) RETURNING id",
+		"INSERT INTO users (username, encrypted_password, email, role) VALUES ($1, $2, $3, $4) RETURNING id",
 		u.Username,
 		u.EncryptedPassword,
+		u.Email,
+		u.Role,
 	).Scan(&u.ID)
 }
 
 func (r *UserRepository) FindByUsername(username string) (*model.User, error) {
 	u := &model.User{}
 	if err := r.store.db.QueryRow(
-		"SELECT id, username, encrypted_password FROM users WHERE username = $1",
+		"SELECT id, username, email, encrypted_password, role FROM users WHERE username = $1",
 		username,
 	).Scan(
 		&u.ID,
 		&u.Username,
+		&u.Email,
 		&u.EncryptedPassword,
+		&u.Role,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound
 		}
 		return nil, err
-
 	}
+	return u, nil
+}
 
+func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
+	u := &model.User{}
+	if err := r.store.db.QueryRow(
+		"SELECT id, username, email, encrypted_password, role FROM users WHERE email = $1",
+		email,
+	).Scan(
+		&u.ID,
+		&u.Username,
+		&u.Email,
+		&u.EncryptedPassword,
+		&u.Role,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, store.ErrRecordNotFound
+		}
+		return nil, err
+	}
 	return u, nil
 }
 

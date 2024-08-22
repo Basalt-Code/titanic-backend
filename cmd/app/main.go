@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmd/app/main.go/internal/api"
 	"cmd/app/main.go/internal/config"
 	store "cmd/app/main.go/internal/store/sqlstore"
 	"log/slog"
@@ -8,7 +9,6 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/lib/pq" //.
 )
 
@@ -23,17 +23,20 @@ func main() {
 
 	// создаем объект логгера
 	log := setupLogger(cfg.Env)
-	log.Info("Server is starting on port 8000...")
 
 	storage, err := store.New(cfg.StoragePath)
 	if err != nil {
 		log.Error("failed to init storage")
 		os.Exit(1)
 	}
-	_ = storage
 
 	router := chi.NewRouter()
-	router.Use(middleware.RequestID)
+	// router.Use(middleware.RequestID)
+
+	// Хендлеры
+	router.Post("/users", func(w http.ResponseWriter, r *http.Request) {
+		api.CreateUserHandler(w, r, storage)
+	})
 
 	srv := &http.Server{
 		Addr:         cfg.Address,
@@ -43,6 +46,7 @@ func main() {
 		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
 	}
 
+	log.Info("Server is starting on port 8000...")
 	if err := srv.ListenAndServe(); err != nil {
 		log.Error("failed to start server")
 	}

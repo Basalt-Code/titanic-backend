@@ -26,8 +26,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - titanic_db:/var/lib/postgresql/data/
     container_name: titanic_db
 
 volumes:
-  postgres_data:
+  titanic_db:
