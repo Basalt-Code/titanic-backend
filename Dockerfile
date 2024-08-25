@@ -1,13 +1,20 @@
-FROM golang:latest
+# Build stage
+FROM golang:1.22.6-alpine AS builder
 
-WORKDIR /app
+WORKDIR /build
+
+COPY go.mod go.sum ./
+RUN go mod download
 
 COPY . .
 
-RUN git config --global --add safe.directory /app
-RUN go mod tidy
-RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-RUN apt update && apt install -y postgresql-client
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/server ./cmd/app/main.go
 
+FROM alpine:latest
 
-EXPOSE 8000
+WORKDIR /go/src/app
+
+COPY --from=builder /build/bin/server .
+COPY --from=builder /build/.env .
+
+CMD [ "./server" ]
