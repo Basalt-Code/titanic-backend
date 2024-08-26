@@ -4,13 +4,18 @@ docker-compose build
 docker-compose up
 ```
 
+### Шаблон env файла
 
-Для создания миграции использовать в терминале контейнера команду:
 ```
-migrate create -ext sql -dir migrations <имя_Файла>
-```
+PGUSER=
+PGPASSWORD=
+PGHOST=
+PGPORT=
+PGDATABASE=
+PGSSLMODE=
 
-Для применения миграции использовать команду:
-```
-migrate -path migrations -database "postgres://postgres:password@db:5432/titanic_db?sslmode=disable" up
+ENVIRONMENT=debug
+HTTP_PORT=8080
+LOG_FILE_PATH=logs.log
+SECRET_KEY=
 ```
