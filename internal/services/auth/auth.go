@@ -10,6 +10,8 @@ import (
 
 	"cmd/app/main.go/internal/config"
 	"cmd/app/main.go/internal/model"
+	"cmd/app/main.go/internal/pkg/logger"
+	"cmd/app/main.go/internal/pkg/smtp_server"
 )
 
 type authRepo interface {
@@ -17,14 +19,23 @@ type authRepo interface {
 }
 
 type Service struct {
-	cfg      config.ServerConfig
-	authRepo authRepo
+	cfg         config.ServerConfig
+	smtp_server *smtp_server.SMTPServer
+	logger      logger.Logger
+	authRepo    authRepo
 }
 
-func New(cfg config.ServerConfig, authRepo authRepo) *Service {
+func New(
+	cfg config.ServerConfig,
+	smtp_server *smtp_server.SMTPServer,
+	logger logger.Logger,
+	authRepo authRepo,
+) *Service {
 	return &Service{
-		cfg:      cfg,
-		authRepo: authRepo,
+		cfg:         cfg,
+		smtp_server: smtp_server,
+		logger:      logger,
+		authRepo:    authRepo,
 	}
 }
 
@@ -39,6 +50,30 @@ func (s *Service) Register(ctx context.Context, credentials model.RegistrationCr
 	if err != nil {
 		return err
 	}
+
+	go func() {
+		subject := "Вы зарегистрированы в Titanic!"
+		body := fmt.Sprintf(
+			"Ваш логин: %s\nВаш пароль: %s",
+			credentials.Email,
+			credentials.Password,
+		)
+		err := s.smtp_server.SendEmail(
+			credentials.Email,
+			s.smtp_server.GetEmail(),
+			subject,
+			body,
+		)
+		if err != nil {
+			s.logger.Err(
+				fmt.Printf(
+					"Failed to send welcome email to %s: %v",
+					credentials.Nickname,
+					err,
+				),
+			)
+		}
+	}()
 
 	return nil
 }
