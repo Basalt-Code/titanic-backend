@@ -38,9 +38,9 @@ func New(logger logger, authService authService) *gin.Engine {
 	api := r.Group("/api")
 	api.POST("/auth/register", h.Register)
 	api.POST("/auth/login", h.Login)
+	api.POST("/auth/refresh", h.RefreshToken)
 
 	api.Use(h.Auth())
-	api.POST("/auth/refresh", h.RefreshToken)
 	api.POST("/auth/logout", h.Logout)
 
 	return r
