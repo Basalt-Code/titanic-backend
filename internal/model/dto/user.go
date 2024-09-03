@@ -1,10 +1,4 @@
-package model
-
-type RegistrationCredentials struct {
-	Nickname string
-	Email    string
-	Password string
-}
+package dto
 
 type User struct {
 	ID       string

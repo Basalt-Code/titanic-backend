@@ -8,3 +8,13 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at          TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+    user_id             UUID NOT NULL,
+    session_id          UUID NOT NULL,
+    refresh_token       TEXT NOT NULL,
+    expired_at          TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at          TIMESTAMP WITH TIME ZONE
+);

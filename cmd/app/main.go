@@ -11,6 +11,7 @@ import (
 	"cmd/app/main.go/internal/pkg/db"
 	"cmd/app/main.go/internal/pkg/logger"
 	authrepo "cmd/app/main.go/internal/repository/auth"
+	userrepo "cmd/app/main.go/internal/repository/user"
 	authservices "cmd/app/main.go/internal/services/auth"
 )
 
@@ -30,7 +31,14 @@ func main() {
 		panic(err)
 	}
 
-	r := api.New(logs, authservices.New(cfg.ServerConfig, authrepo.New(pool)))
+	r := api.New(
+		logs,
+		authservices.New(
+			cfg.ServerConfig,
+			userrepo.New(pool),
+			authrepo.New(pool),
+		),
+	)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.ServerConfig.ServerPort,
