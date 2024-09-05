@@ -10,6 +10,7 @@ import (
 type Config struct {
 	DBConfig     DBConfig
 	ServerConfig ServerConfig
+	SMTPConfig   SMTPConfig
 }
 
 type DBConfig struct {
@@ -26,6 +27,13 @@ type ServerConfig struct {
 	ServerPort  string `env:"HTTP_PORT" envDefault:"8080"`
 	LogFilePath string `env:"LOG_FILE_PATH"`
 	SecretKey   string `env:"SECRET_KEY,notEmpty"`
+}
+
+type SMTPConfig struct {
+	SmtpHost       string `env:"SMTP_HOST"`
+	SmtpPort       string `env:"SMTP_PORT"`
+	SenderEmail    string `env:"SENDER_EMAIL"`
+	SenderPassword string `env:"SENDER_PASSWORD"`
 }
 
 func NewConfig() (*Config, error) {
