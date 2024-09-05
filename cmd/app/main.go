@@ -31,13 +31,11 @@ func main() {
 		panic(err)
 	}
 
-	smpt_server := smtp_server.NewSMTPServer(cfg)
-
 	r := api.New(
 		logs,
 		authservices.New(
 			cfg.ServerConfig,
-			smpt_server,
+			smtpserver.NewSMTPServer(cfg.SMTPConfig),
 			*logs,
 			authrepo.New(pool),
 		),

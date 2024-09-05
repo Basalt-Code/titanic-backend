@@ -1,4 +1,4 @@
-package smtp_server
+package smtpserver
 
 import (
 	"cmd/app/main.go/internal/config"
@@ -6,44 +6,37 @@ import (
 )
 
 type SMTPServer struct {
-	host     string
-	port     string
-	email    string
-	password string
-	auth     smtp.Auth
+	cfg config.SMTPConfig
 }
 
-func NewSMTPServer(cfg *config.Config) *SMTPServer {
-	auth := smtp.PlainAuth(
-		"",
-		cfg.SMTPConfig.SenderEmail,
-		cfg.SMTPConfig.SenderPassword,
-		cfg.SMTPConfig.SmtpHost,
-	)
+func NewSMTPServer(cfg config.SMTPConfig) *SMTPServer {
 	s := SMTPServer{
-		cfg.SMTPConfig.SmtpHost,
-		cfg.SMTPConfig.SmtpPort,
-		cfg.SMTPConfig.SenderEmail,
-		cfg.SMTPConfig.SenderPassword,
-		auth,
+		cfg: cfg,
 	}
 	return &s
 }
 
-func (s *SMTPServer) GetEmail() string {
-	return s.email
-}
+func (s *SMTPServer) SendEmail(
+	receiverEmail string,
+	subject string,
+	body string,
+) error {
+	auth := smtp.PlainAuth(
+		"",
+		s.cfg.SenderEmail,
+		s.cfg.SenderPassword,
+		s.cfg.SmtpHost,
+	)
 
-func (s *SMTPServer) SendEmail(receiver_email string, from_email string, subject string, body string) error {
-	message := []byte("From: " + s.email + "\n" +
+	message := []byte("From: " + s.cfg.SenderEmail + "\n" +
 		"Subject: " + subject + "\n\n" +
 		body,
 	)
 	err := smtp.SendMail(
-		s.host+":"+s.port,
-		s.auth,
-		s.email,
-		[]string{receiver_email},
+		s.cfg.SmtpHost+":"+s.cfg.SmtpPort,
+		auth,
+		s.cfg.SenderEmail,
+		[]string{receiverEmail},
 		message,
 	)
 	return err

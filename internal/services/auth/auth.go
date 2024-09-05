@@ -19,23 +19,18 @@ type authRepo interface {
 }
 
 type Service struct {
-	cfg         config.ServerConfig
-	smtp_server *smtp_server.SMTPServer
-	logger      logger.Logger
-	authRepo    authRepo
+	cfg        config.ServerConfig
+	smtpServer *smtpserver.SMTPServer
+	logger     logger.Logger
+	authRepo   authRepo
 }
 
-func New(
-	cfg config.ServerConfig,
-	smtp_server *smtp_server.SMTPServer,
-	logger logger.Logger,
-	authRepo authRepo,
-) *Service {
+func New(cfg config.ServerConfig, smtpServer *smtpserver.SMTPServer, logger logger.Logger, authRepo authRepo) *Service {
 	return &Service{
-		cfg:         cfg,
-		smtp_server: smtp_server,
-		logger:      logger,
-		authRepo:    authRepo,
+		cfg:        cfg,
+		smtpServer: smtpServer,
+		logger:     logger,
+		authRepo:   authRepo,
 	}
 }
 
@@ -55,19 +50,18 @@ func (s *Service) Register(ctx context.Context, credentials model.RegistrationCr
 		subject := "Вы зарегистрированы в Titanic!"
 		body := fmt.Sprintf(
 			"Ваш логин: %s\nВаш пароль: %s",
-			credentials.Email,
+			credentials.Nickname,
 			credentials.Password,
 		)
-		err := s.smtp_server.SendEmail(
+		err := s.smtpServer.SendEmail(
 			credentials.Email,
-			s.smtp_server.GetEmail(),
 			subject,
 			body,
 		)
 		if err != nil {
 			s.logger.Err(
-				fmt.Printf(
-					"Failed to send welcome email to %s: %v",
+				fmt.Errorf(
+					"failed to send welcome email to %s: %v",
 					credentials.Nickname,
 					err,
 				),
