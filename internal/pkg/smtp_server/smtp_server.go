@@ -10,10 +10,7 @@ type SMTPServer struct {
 }
 
 func NewSMTPServer(cfg config.SMTPConfig) *SMTPServer {
-	s := SMTPServer{
-		cfg: cfg,
-	}
-	return &s
+	return &SMTPServer{cfg: cfg}
 }
 
 func (s *SMTPServer) SendEmail(
