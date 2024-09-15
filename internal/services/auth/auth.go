@@ -18,7 +18,7 @@ import (
 
 type userRepo interface {
 	Create(ctx context.Context, u dto.User) error
-	FindByEmail(ctx context.Context, email string) (*domain.User, error)
+	FindByUsername(ctx context.Context, email string) (*domain.User, error)
 }
 
 type authRepo interface {
@@ -35,7 +35,7 @@ type Service struct {
 }
 
 var (
-	ErrInvalidCredentials  = errors.New("invalid email or password")
+	ErrInvalidCredentials  = errors.New("invalid username or password")
 	ErrInvalidTokenPair    = errors.New("invalid token pair")
 	ErrInvalidRefreshToken = errors.New("invalid refresh token")
 )
@@ -56,10 +56,10 @@ func (s *Service) Register(ctx context.Context, credentials dto.RegistrationCred
 
 	err = s.userRepo.Create(ctx, dto.User{
 		ID:       uuid.NewString(),
-		Nickname: &credentials.Nickname,
+		Username: &credentials.Username,
 		Email:    &credentials.Email,
 		Password: lo.ToPtr(string(passHash)),
-		Role:     lo.ToPtr("user"),
+		Role:     &credentials.Role,
 	})
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func (s *Service) Register(ctx context.Context, credentials dto.RegistrationCred
 }
 
 func (s *Service) Login(ctx context.Context, credentials dto.Credentials) (domain.Tokens, error) {
-	user, err := s.userRepo.FindByEmail(ctx, credentials.Email)
+	user, err := s.userRepo.FindByUsername(ctx, credentials.Username)
 	if err != nil {
 		return domain.Tokens{}, err
 	}

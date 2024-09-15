@@ -12,7 +12,7 @@ import (
 	"cmd/app/main.go/internal/services/auth"
 )
 
-const invalidEmailOrPasswordMsgErr = "Неправильный логин или пароль"
+const invalidCredentials = "Неправильный логин или пароль"
 
 func (api *API) Login(c *gin.Context) {
 	var req apimodels.LoginReq
@@ -22,12 +22,12 @@ func (api *API) Login(c *gin.Context) {
 	}
 
 	tokens, err := api.authService.Login(c, dto.Credentials{
-		Email:    req.Email,
+		Username: req.Username,
 		Password: req.Password,
 	})
 	if err != nil {
 		if errors.Is(err, auth.ErrInvalidCredentials) {
-			response.WithUnauthorizedError(c, invalidEmailOrPasswordMsgErr)
+			response.WithUnauthorizedError(c, invalidCredentials)
 			return
 		}
 

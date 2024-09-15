@@ -21,9 +21,10 @@ func (api *API) Register(c *gin.Context) {
 	}
 
 	if err := api.authService.Register(c, dto.RegistrationCredentials{
-		Nickname: strings.ToLower(req.Nickname),
+		Username: strings.ToLower(req.Username),
 		Email:    strings.ToLower(req.Email),
 		Password: req.Password,
+		Role:     strings.ToLower(req.Role),
 	}); err != nil {
 		var errDupl repo.ErrDuplicateField
 		if errors.As(err, &errDupl) {

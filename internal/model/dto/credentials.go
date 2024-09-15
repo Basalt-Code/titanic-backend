@@ -1,12 +1,13 @@
 package dto
 
 type RegistrationCredentials struct {
-	Nickname string
+	Username string
 	Email    string
 	Password string
+	Role     string
 }
 
 type Credentials struct {
-	Email    string
+	Username string
 	Password string
 }

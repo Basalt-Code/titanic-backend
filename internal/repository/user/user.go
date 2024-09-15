@@ -22,12 +22,11 @@ func New(pool *pgxpool.Pool) *Repo {
 }
 
 func (r *Repo) Create(ctx context.Context, u dto.User) error {
-	query := ` 
-		INSERT INTO users (id, nickname, email, password, role)
- 		SELECT $1, LOWER($2), LOWER($3), $4, LOWER($5)
-		RETURNING id, nickname, email, password, role`
+	query := `
+		INSERT INTO users (id, username, email, password, role)
+		VALUES ($1, LOWER($2), LOWER($3), $4, LOWER($5))`
 
-	_, err := r.pool.Exec(ctx, query, u.ID, u.Nickname, u.Email, u.Password, u.Role)
+	_, err := r.pool.Exec(ctx, query, u.ID, u.Username, u.Email, u.Password, u.Role)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -42,16 +41,16 @@ func (r *Repo) Create(ctx context.Context, u dto.User) error {
 	return nil
 }
 
-func (r *Repo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (r *Repo) FindByUsername(ctx context.Context, username string) (*domain.User, error) {
 	query := `
-		SELECT id, nickname, email, password, role
+		SELECT id, username, email, password, role
 		FROM users
-		WHERE deleted_at IS NULL AND email = $1`
+		WHERE deleted_at IS NULL AND username = $1`
 
 	var user domain.User
-	if err := r.pool.QueryRow(ctx, query, email).Scan(
+	if err := r.pool.QueryRow(ctx, query, username).Scan(
 		&user.ID,
-		&user.Nickname,
+		&user.Username,
 		&user.Email,
 		&user.Password,
 		&user.Role,
