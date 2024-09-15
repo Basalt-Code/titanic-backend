@@ -1,0 +1,228 @@
+openapi: 3.0.0
+info:
+  contact: { }
+  description: Titanic-Backend
+  title: Titanic API
+  version: "0.1"
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Регистрация пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+                - role
+              properties:
+                username:
+                  type: string
+                  example: elbrus
+                email:
+                  type: string
+                  format: email
+                  example: example@mail.ru
+                password:
+                  type: string
+                  format: password
+                  example: passWord1~2
+                role:
+                  type: string
+                  example: admin
+      responses:
+        '200':
+          description: 'Успешный ответ'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                emailAlreadyExists:
+                  summary: Почта уже существует
+                  value:
+                    error:
+                      message: 'Почта уже существует'
+                nicknameAlreadyExists:
+                  summary: Никнейм уже существует
+                  value:
+                    error:
+                      message: 'Никнейм уже существует'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                internalServerError:
+                  summary: Внутренняя ошибка сервера
+                  value:
+                    error:
+                      message: 'что-то пошло не так, попробуйте позже.'
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Аутентификация пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  format: username
+                  example: elbrus
+                password:
+                  type: string
+                  format: password
+                  example: passWord1~2
+      responses:
+        '200':
+          description: 'Успешный ответ'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/tokens'
+
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                invalidEmailOrPasswordErr:
+                  summary: 'Неправильный логин или пароль'
+                  value:
+                    error:
+                      message: 'Неправильный логин или пароль'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                internalServerError:
+                  summary: Внутренняя ошибка сервера
+                  value:
+                    error:
+                      message: 'что-то пошло не так, попробуйте позже.'
+
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Аутентификация пользователя
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: OK
+
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                internalServerError:
+                  summary: Внутренняя ошибка сервера
+                  value:
+                    error:
+                      message: 'что-то пошло не так, попробуйте позже.'
+
+  /auth/refresh-tokens:
+    post:
+      tags:
+        - Auth
+      summary: Обновить токены
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  example: 'e1f8fa9a-073e-41d4-9e5e-50ef525045b1SEqwRE'
+      responses:
+        '200':
+          description: 'Успешный ответ'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/tokens'
+
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                invalidRefreshToken:
+                  summary: 'Невалидный refresh-токен'
+                  value:
+                    error:
+                      message: 'невалидный refresh-токен'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                internalServerError:
+                  summary: Внутренняя ошибка сервера
+                  value:
+                    error:
+                      message: 'что-то пошло не так, попробуйте позже.'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    errorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+    tokens:
+      type: object
+      properties:
+        tokens:
+          type: object
+          properties:
+            access:
+              type: string
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTc1MjYzODksImlhdCI6MTcxNzUyNTQ4OSwiVXNlcklEIjoiMzgyMmIyMDQtMmJhOS00ZmU4LTlkOWEtZGYxZTY5YTE4OWQ5IiwiU2Vzc2lvbklEIjoiMmYyMjUzMTEtZjNkNy00NzU5LTlkZjAtOWVkN2NiMWZhYjNlIiwiUm9sZSI6ImFkbWluIn0.cGv6-AuTrLI-Xh2FjNsbEu4xmJ2uZ54Fx_IMdSEqwRE'
+            refresh:
+              type: string
+              example: 'e1f8fa9a-073e-41d4-9e5e-50ef525045b1SEqwRE'

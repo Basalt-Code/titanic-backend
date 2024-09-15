@@ -59,6 +59,14 @@ func WithJSONError(c *gin.Context, err error) {
 	return
 }
 
+func WithUnauthorizedError(c *gin.Context, errMsg string) {
+	c.JSON(http.StatusUnauthorized, ErrorResponse{
+		Error: Error{
+			Message: errMsg,
+		},
+	})
+}
+
 func WithInternalServerError(c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, ErrorResponse{
 		Error: Error{

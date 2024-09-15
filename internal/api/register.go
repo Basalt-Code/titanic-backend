@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"cmd/app/main.go/internal/api/models"
-	"cmd/app/main.go/internal/model"
+	"cmd/app/main.go/internal/model/dto"
 	"cmd/app/main.go/internal/pkg/http_resp"
 	repo "cmd/app/main.go/internal/repository"
 )
@@ -20,10 +20,11 @@ func (api *API) Register(c *gin.Context) {
 		return
 	}
 
-	if err := api.service.Register(c, model.RegistrationCredentials{
-		Nickname: strings.ToLower(req.Nickname),
+	if err := api.authService.Register(c, dto.RegistrationCredentials{
+		Username: strings.ToLower(req.Username),
 		Email:    strings.ToLower(req.Email),
 		Password: req.Password,
+		Role:     strings.ToLower(req.Role),
 	}); err != nil {
 		var errDupl repo.ErrDuplicateField
 		if errors.As(err, &errDupl) {
